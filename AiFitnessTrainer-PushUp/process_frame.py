@@ -351,13 +351,14 @@ class ProcessFrame:
                 
 
                 current_state = self._get_state(int(elbow_vertical_angle))
+                print(f'current state {current_state}')
                 self.state_tracker['curr_state'] = current_state
                 self._update_state_sequence(current_state)
 
 
 
                 # -------------------------------------- COMPUTE COUNTERS --------------------------------------
-
+                print(self.state_tracker['state_seq'])
                 if current_state == 's1':
                     if len(self.state_tracker['state_seq']) == 3 and not  self.state_tracker['ELBOWS_POINTED_OUT'] and not self.state_tracker['CORRECT_YOUR_HIPS']:
                         self.state_tracker['PUSHUP_COUNT']+=1
@@ -384,11 +385,10 @@ class ProcessFrame:
 
 
                 # -------------------------------------- PERFORM FEEDBACK ACTIONS --------------------------------------
-
                 else:                    
                      #go low:s1-->s2 shoulder_elbow_vert in[0,35]
                     if  elbow_vertical_angle < self.thresholds['SHOUDER_ELBOW_VERT']['NORMAL'][1] and \
-                       self.state_tracker['state_seq'].count('s1')==1:
+                       self.state_tracker['state_seq'].count('s2')==0:
                         self.state_tracker['GO_LOW'] = True  
 
                    #go deeper:s2-->s3    shoulder_elbow_vert in[40,80]
@@ -450,10 +450,10 @@ class ProcessFrame:
 
                 
                 
-                if 's2' in self.state_tracker['state_seq'] or current_state == 's1':
+                if ('s2' in self.state_tracker['state_seq'] and 's3' not in self.state_tracker['state_seq']) or (current_state == 's1'and not 's2' in self.state_tracker['state_seq'] ):
                     self.state_tracker['GO_LOW'] = False
 
-                if 's3' in self.state_tracker['state_seq'] or current_state == 's2':
+                if 's3' in self.state_tracker['state_seq'] or (current_state == 's2'  and not 's3' in self.state_tracker['state_seq']):
                     self.state_tracker['GO_DEEPER'] = False
 
                 self.state_tracker['COUNT_FRAMES'][self.state_tracker['DISPLAY_TEXT']]+=1
@@ -480,7 +480,7 @@ class ProcessFrame:
                     "CORRECT: " + str(self.state_tracker['PUSHUP_COUNT']), 
                     pos=(int(frame_width*0.68), 30),
                     text_color=(255, 255, 230),
-                    font_scale=0.6,  # Increase the font scale to make the text larger
+                    font_scale=2,  # Increase the font scale to make the text larger
                     text_color_bg=(18, 185, 0)
                 )
 
@@ -489,7 +489,7 @@ class ProcessFrame:
                     "INCORRECT: " + str(self.state_tracker['IMPROPER_PUSHUP']), 
                     pos=(int(frame_width*0.68), 80),
                     text_color=(255, 255, 230),
-                    font_scale=0.6,  # Increase the font scale to make the text larger
+                    font_scale=2,  # Increase the font scale to make the text larger
                     text_color_bg=(221, 0, 0),
                 )
   
@@ -552,8 +552,8 @@ class ProcessFrame:
             self.state_tracker['INACTIVE_TIME_FRONT'] = 0.0
             self.state_tracker['ELBOWS_POINTED_OUT'] = False
             self.state_tracker['CORRECT_YOUR_HIPS'] = False
-            self.state_tracker['DISPLAY_TEXT'] = np.full((5,), False)
-            self.state_tracker['COUNT_FRAMES'] = np.zeros((5,), dtype=np.int64)
+            self.state_tracker['DISPLAY_TEXT'] = np.full((2,), False)
+            self.state_tracker['COUNT_FRAMES'] = np.zeros((2,), dtype=np.int64)
             self.state_tracker['start_inactive_time_front'] = time.perf_counter()
             
             

@@ -5,8 +5,8 @@ def get_thresholds_beginner():
 
     _ANGLE_SHOULDER_ELBOW_VERT = {
                             'NORMAL' : (0,  35),
-                            'TRANS'  : (40, 80),
-                            'PASS'   : (90, 120)
+                            'TRANS'  : (40, 55),
+                            'PASS'   : (60, 100)
                            }    
 
     #go low:s1-->s2 shoulder_elbow_vert in[0,35]
@@ -16,7 +16,7 @@ def get_thresholds_beginner():
     thresholds = {
                     'SHOUDER_ELBOW_VERT': _ANGLE_SHOULDER_ELBOW_VERT,
                     'KNEE_ANKLE_VERT':60,
-                    'SHOULDER_HIP_KNEE':170,
+                    'SHOULDER_HIP_KNEE':150,
                     'ELBOW_THRESH':10,
                     #'HIP_THRESH'   : [10, 50],
                     #'ANKLE_THRESH' : 45,
