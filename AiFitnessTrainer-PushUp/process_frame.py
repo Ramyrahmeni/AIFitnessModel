@@ -132,7 +132,7 @@ class ProcessFrame:
                 'Go Low', 
                 pos=(30, 80),
                 text_color=(0, 0, 0),
-                font_scale=1.5,  # Increase the font scale to make the text larger
+                font_scale=0.6,  # Increase the font scale to make the text larger
                 text_color_bg=(255, 255, 0)
             )
         if go_deeper:
@@ -141,7 +141,7 @@ class ProcessFrame:
                 'Go deeper', 
                 pos=(30, 100),
                 text_color=(0, 0, 0),
-                font_scale=1.5,  # Increase the font scale to make the text larger
+                font_scale=0.6,  # Increase the font scale to make the text larger
                 text_color_bg=(255, 255, 0)
                 )
 
@@ -151,7 +151,7 @@ class ProcessFrame:
                     dict_maps[idx][0], 
                     pos=(30, dict_maps[idx][1]),
                     text_color=(255, 255, 230),
-                    font_scale=1,
+                    font_scale=0.6,
                     text_color_bg=dict_maps[idx][2]
                 )
 
@@ -397,11 +397,12 @@ class ProcessFrame:
                         self.state_tracker['GO_DEEPER'] = True  
 
                     #elbows_pointed_out: shoulder_elbow_vert<10 and knee_ankle_vert>60
+                    print(f'anklevert{ankle_vertical_angle} and thresh {self.thresholds["KNEE_ANKLE_VERT"]}')
                     if elbow_vertical_angle < self.thresholds['ELBOW_THRESH'] and ankle_vertical_angle>self.thresholds['KNEE_ANKLE_VERT'] :
                         self.state_tracker['DISPLAY_TEXT'][0] = True
                         self.state_tracker['ELBOWS_POINTED_OUT'] = True
 
-                    #hip_mistake:shoulder_hip_knee >170
+                    #hip_mistake:shoulder_hip_knee< 170
                         
                     if (shoulder_hip_knee < self.thresholds['SHOULDER_HIP_KNEE']):
                         self.state_tracker['DISPLAY_TEXT'][1] = True
@@ -450,7 +451,7 @@ class ProcessFrame:
 
                 
                 
-                if ('s2' in self.state_tracker['state_seq'] and 's3' not in self.state_tracker['state_seq']) or (current_state == 's1'and not 's2' in self.state_tracker['state_seq'] ):
+                if ('s2' in self.state_tracker['state_seq'] ) or (current_state == 's1'and not 's2' in self.state_tracker['state_seq'] ):
                     self.state_tracker['GO_LOW'] = False
 
                 if 's3' in self.state_tracker['state_seq'] or (current_state == 's2'  and not 's3' in self.state_tracker['state_seq']):
@@ -470,9 +471,9 @@ class ProcessFrame:
                     self.state_tracker['INACTIVE_TIME'] = 0.0
 
                 
-                cv2.putText(frame, str(int(shoulder_hip_knee)), (hip_text_coord_x, hip_coord[1]), self.font, 2, self.COLORS['light_green'], 2, lineType=self.linetype)
-                cv2.putText(frame, str(int(elbow_vertical_angle)), (elbow_text_coord_x, elbow_coord[1]+10), self.font, 2, self.COLORS['light_green'], 2, lineType=self.linetype)
-                cv2.putText(frame, str(int(ankle_vertical_angle)), (ankle_text_coord_x, ankle_coord[1]), self.font, 2, self.COLORS['light_green'], 2, lineType=self.linetype)
+                cv2.putText(frame, str(int(shoulder_hip_knee)), (hip_text_coord_x, hip_coord[1]), self.font, 1, self.COLORS['light_green'], 2, lineType=self.linetype)
+                cv2.putText(frame, str(int(elbow_vertical_angle)), (elbow_text_coord_x, elbow_coord[1]+10), self.font, 1, self.COLORS['light_green'], 2, lineType=self.linetype)
+                cv2.putText(frame, str(int(ankle_vertical_angle)), (ankle_text_coord_x, ankle_coord[1]), self.font, 1, self.COLORS['light_green'], 2, lineType=self.linetype)
 
                  
                 draw_text(
@@ -480,7 +481,7 @@ class ProcessFrame:
                     "CORRECT: " + str(self.state_tracker['PUSHUP_COUNT']), 
                     pos=(int(frame_width*0.68), 30),
                     text_color=(255, 255, 230),
-                    font_scale=2,  # Increase the font scale to make the text larger
+                    font_scale=0.6,  # Increase the font scale to make the text larger
                     text_color_bg=(18, 185, 0)
                 )
 
@@ -489,7 +490,7 @@ class ProcessFrame:
                     "INCORRECT: " + str(self.state_tracker['IMPROPER_PUSHUP']), 
                     pos=(int(frame_width*0.68), 80),
                     text_color=(255, 255, 230),
-                    font_scale=2,  # Increase the font scale to make the text larger
+                    font_scale=0.6,  # Increase the font scale to make the text larger
                     text_color_bg=(221, 0, 0),
                 )
   

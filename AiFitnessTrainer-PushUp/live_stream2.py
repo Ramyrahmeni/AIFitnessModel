@@ -15,7 +15,7 @@ from process_frame import ProcessFrame
 from thresholds import get_thresholds_beginner, get_thresholds_pro
 
 
-st.title('AI Fitness Trainer: Squats Analysis')
+st.title('AI Fitness Trainer: Push Up Analysis')
 
 mode = st.radio('Select Mode', ['Beginner', 'Pro'], horizontal=True)
 
