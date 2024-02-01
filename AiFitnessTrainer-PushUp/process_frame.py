@@ -360,6 +360,10 @@ class ProcessFrame:
                 # -------------------------------------- COMPUTE COUNTERS --------------------------------------
                 print(self.state_tracker['state_seq'])
                 if current_state == 's1':
+                    #go low:s1-->s2 shoulder_elbow_vert in[0,35]
+                    if  elbow_vertical_angle < self.thresholds['SHOUDER_ELBOW_VERT']['NORMAL'][1] and \
+                       self.state_tracker['state_seq'].count('s2')==0:
+                        self.state_tracker['GO_LOW'] = True  
                     if len(self.state_tracker['state_seq']) == 3 and not  self.state_tracker['ELBOWS_POINTED_OUT'] and not self.state_tracker['CORRECT_YOUR_HIPS']:
                         self.state_tracker['PUSHUP_COUNT']+=1
                         play_sound = str(self.state_tracker['PUSHUP_COUNT'])
@@ -386,13 +390,10 @@ class ProcessFrame:
 
                 # -------------------------------------- PERFORM FEEDBACK ACTIONS --------------------------------------
                 else:                    
-                     #go low:s1-->s2 shoulder_elbow_vert in[0,35]
-                    if  elbow_vertical_angle < self.thresholds['SHOUDER_ELBOW_VERT']['NORMAL'][1] and \
-                       self.state_tracker['state_seq'].count('s2')==0:
-                        self.state_tracker['GO_LOW'] = True  
+                     
 
                    #go deeper:s2-->s3    shoulder_elbow_vert in[40,80]
-                    elif  elbow_vertical_angle < self.thresholds['SHOUDER_ELBOW_VERT']['TRANS'][1] and \
+                    if  elbow_vertical_angle < self.thresholds['SHOUDER_ELBOW_VERT']['TRANS'][1] and \
                        self.state_tracker['state_seq'].count('s2')==1:
                         self.state_tracker['GO_DEEPER'] = True  
 
