@@ -90,20 +90,18 @@ class ProcessFrame:
         }
         
         self.FEEDBACK_ID_MAP = {
-                                0: ('BEND BACKWARDS', 215, (0, 153, 255)),
-                                1: ('BEND FORWARD', 215, (0, 153, 255)),
-                                2: ('KNEE FALLING OVER TOE', 170, (255, 80, 80)),
-                                3: ('SQUAT TOO DEEP', 125, (255, 80, 80))
+                                0: ('LIFT BODY', 215, (0, 153, 255)),
+                                1: ('CORRECT YOUR NECK', 215, (0, 153, 255)),
                                }
-    def _get_state(self, knee_angle):
+    def _get_state(self, hip_angle):
         
         knee = None        
 
-        if self.thresholds['HIP_KNEE_VERT']['NORMAL'][0] <= knee_angle <= self.thresholds['HIP_KNEE_VERT']['NORMAL'][1]:
+        if self.thresholds['SHOUDER_ELBOW_VERT']['NORMAL'][0] <= hip_angle <= self.thresholds['SHOUDER_ELBOW_VERT']['NORMAL'][1]:
             knee = 1
-        elif self.thresholds['HIP_KNEE_VERT']['TRANS'][0] <= knee_angle <= self.thresholds['HIP_KNEE_VERT']['TRANS'][1]:
+        elif self.thresholds['SHOUDER_ELBOW_VERT']['TRANS'][0] <= hip_angle <= self.thresholds['SHOUDER_ELBOW_VERT']['TRANS'][1]:
             knee = 2
-        elif self.thresholds['HIP_KNEE_VERT']['PASS'][0] <= knee_angle <= self.thresholds['HIP_KNEE_VERT']['PASS'][1]:
+        elif self.thresholds['SHOUDER_ELBOW_VERT']['PASS'][0] <= hip_angle <= self.thresholds['SHOUDER_ELBOW_VERT']['PASS'][1]:
             knee = 3
 
         return f's{knee}' if knee else None
@@ -118,13 +116,13 @@ class ProcessFrame:
         elif state == 's3':
             if (state not in self.state_tracker['state_seq']) and 's2' in self.state_tracker['state_seq']: 
                 self.state_tracker['state_seq'].append(state)
-    def _show_feedback(self, frame, c_frame, dict_maps, lower_hips_disp):
+    def _show_feedback(self, frame, c_frame, dict_maps, lift_body):
 
 
-        if lower_hips_disp:
+        if lift_body:
             draw_text(
                     frame, 
-                    'LOWER YOUR HIPS', 
+                    'LIFT YOUR BODY', 
                     pos=(30, 80),
                     text_color=(0, 0, 0),
                     font_scale=0.6,
@@ -171,8 +169,8 @@ class ProcessFrame:
                 self.state_tracker['start_inactive_time_front'] = end_time
 
                 if self.state_tracker['INACTIVE_TIME_FRONT'] >= self.thresholds['INACTIVE_THRESH']:
-                    self.state_tracker['SQUAT_COUNT'] = 0
-                    self.state_tracker['IMPROPER_SQUAT'] = 0
+                    self.state_tracker['SITUP_COUNT'] = 0
+                    self.state_tracker['IMPROPER_SITUP'] = 0
                     display_inactivity = True
 
                 cv2.circle(frame, nose_coord, 7, self.COLORS['white'], -1)
@@ -191,7 +189,7 @@ class ProcessFrame:
 
                 draw_text(
                     frame, 
-                    "CORRECT: " + str(self.state_tracker['SQUAT_COUNT']), 
+                    "CORRECT: " + str(self.state_tracker['SITUP_COUNT']), 
                     pos=(int(frame_width*0.68), 30),
                     text_color=(255, 255, 230),
                     font_scale=0.7,
@@ -201,7 +199,7 @@ class ProcessFrame:
 
                 draw_text(
                     frame, 
-                    "INCORRECT: " + str(self.state_tracker['IMPROPER_SQUAT']), 
+                    "INCORRECT: " + str(self.state_tracker['IMPROPER_SITUP']), 
                     pos=(int(frame_width*0.68), 80),
                     text_color=(255, 255, 230),
                     font_scale=0.7,
@@ -289,21 +287,21 @@ class ProcessFrame:
 
 
 
-                knee_vertical_angle = find_angle(hip_coord, np.array([knee_coord[0], 0]), knee_coord)
-                cv2.ellipse(frame, knee_coord, (20, 20), 
-                            angle = 0, startAngle = -90, endAngle = -90-multiplier*knee_vertical_angle, 
+                shoulder_vertical_angle = find_angle(nose_coord, np.array([shldr_coord[0], 0]), shldr_coord)
+                cv2.ellipse(frame, shldr_coord, (20, 20), 
+                            angle = 0, startAngle = -90, endAngle = -90-multiplier*shoulder_vertical_angle, 
                             color = self.COLORS['white'], thickness = 3,  lineType = self.linetype)
 
-                draw_dotted_line(frame, knee_coord, start=knee_coord[1]-50, end=knee_coord[1]+20, line_color=self.COLORS['blue'])
+                draw_dotted_line(frame, shldr_coord, start=shldr_coord[1]-50, end=shldr_coord[1]+20, line_color=self.COLORS['blue'])
 
 
 
-                ankle_vertical_angle = find_angle(knee_coord, np.array([ankle_coord[0], 0]), ankle_coord)
+                '''ankle_vertical_angle = find_angle(knee_coord, np.array([ankle_coord[0], 0]), ankle_coord)
                 cv2.ellipse(frame, ankle_coord, (30, 30),
                             angle = 0, startAngle = -90, endAngle = -90 + multiplier*ankle_vertical_angle,
                             color = self.COLORS['white'], thickness = 3,  lineType=self.linetype)
 
-                draw_dotted_line(frame, ankle_coord, start=ankle_coord[1]-50, end=ankle_coord[1]+20, line_color=self.COLORS['blue'])
+                draw_dotted_line(frame, ankle_coord, start=ankle_coord[1]-50, end=ankle_coord[1]+20, line_color=self.COLORS['blue'])'''
 
                 # ------------------------------------------------------------
         
@@ -327,7 +325,7 @@ class ProcessFrame:
 
                 
 
-                current_state = self._get_state(int(knee_vertical_angle))
+                current_state = self._get_state(int(hip_vertical_angle))
                 self.state_tracker['curr_state'] = current_state
                 self._update_state_sequence(current_state)
 
@@ -337,21 +335,21 @@ class ProcessFrame:
 
                 if current_state == 's1':
 
-                    if len(self.state_tracker['state_seq']) == 3 and not self.state_tracker['INCORRECT_POSTURE']:
-                        self.state_tracker['SQUAT_COUNT']+=1
-                        play_sound = str(self.state_tracker['SQUAT_COUNT'])
+                    if len(self.state_tracker['state_seq']) == 3 and not self.state_tracker['INCORRECT_NECK']:
+                        self.state_tracker['SITUP_COUNT']+=1
+                        play_sound = str(self.state_tracker['SITUP_COUNT'])
                         
                     elif 's2' in self.state_tracker['state_seq'] and len(self.state_tracker['state_seq'])==1:
-                        self.state_tracker['IMPROPER_SQUAT']+=1
+                        self.state_tracker['IMPROPER_SITUP']+=1
                         play_sound = 'incorrect'
 
-                    elif self.state_tracker['INCORRECT_POSTURE']:
-                        self.state_tracker['IMPROPER_SQUAT']+=1
+                    elif self.state_tracker['INCORRECT_NECK']:
+                        self.state_tracker['IMPROPER_SITUP']+=1
                         play_sound = 'incorrect'
                         
                     
                     self.state_tracker['state_seq'] = []
-                    self.state_tracker['INCORRECT_POSTURE'] = False
+                    self.state_tracker['INCORRECT_NECK'] = False
 
 
                 # ----------------------------------------------------------------------------------------------------
@@ -362,17 +360,19 @@ class ProcessFrame:
                 # -------------------------------------- PERFORM FEEDBACK ACTIONS --------------------------------------
 
                 else:
-                    if hip_vertical_angle > self.thresholds['HIP_THRESH'][1]:
-                        self.state_tracker['DISPLAY_TEXT'][0] = True
+                    if shoulder_vertical_angle < self.thresholds['SHOULDER_THRESH']:
+                        self.state_tracker['DISPLAY_TEXT'][1] = True
+                        self.state_tracker['INCORRECT_NECK'] = True
                         
 
-                    elif hip_vertical_angle < self.thresholds['HIP_THRESH'][0] and \
-                         self.state_tracker['state_seq'].count('s2')==1:
-                            self.state_tracker['DISPLAY_TEXT'][1] = True
+                    if hip_vertical_angle > self.thresholds['SHOUDER_ELBOW_VERT']['NORMAL'][0] and \
+                         self.state_tracker['state_seq'].count('s2')==0:
+                            self.state_tracker['DISPLAY_TEXT'][0] = True
+                            self.state_tracker['LIFT_BODY'] = True
                         
                                         
                     
-                    if self.thresholds['KNEE_THRESH'][0] < knee_vertical_angle < self.thresholds['KNEE_THRESH'][1] and \
+                    '''if self.thresholds['KNEE_THRESH'][0] < knee_vertical_angle < self.thresholds['KNEE_THRESH'][1] and \
                        self.state_tracker['state_seq'].count('s2')==1:
                         self.state_tracker['LOWER_HIPS'] = True
 
@@ -384,7 +384,7 @@ class ProcessFrame:
                     
                     if (ankle_vertical_angle > self.thresholds['ANKLE_THRESH']):
                         self.state_tracker['DISPLAY_TEXT'][2] = True
-                        self.state_tracker['INCORRECT_POSTURE'] = True
+                        self.state_tracker['INCORRECT_POSTURE'] = True'''
 
 
                 # ----------------------------------------------------------------------------------------------------
@@ -403,8 +403,8 @@ class ProcessFrame:
                     self.state_tracker['start_inactive_time'] = end_time
 
                     if self.state_tracker['INACTIVE_TIME'] >= self.thresholds['INACTIVE_THRESH']:
-                        self.state_tracker['SQUAT_COUNT'] = 0
-                        self.state_tracker['IMPROPER_SQUAT'] = 0
+                        self.state_tracker['SITUP_COUNT'] = 0
+                        self.state_tracker['IMPROPER_SITUP'] = 0
                         display_inactivity = True
 
                 
@@ -418,19 +418,17 @@ class ProcessFrame:
 
 
                 hip_text_coord_x = hip_coord[0] + 10
-                knee_text_coord_x = knee_coord[0] + 15
-                ankle_text_coord_x = ankle_coord[0] + 10
+                shoulder_text_coord_x = shldr_coord[0] + 15
 
                 if self.flip_frame:
                     frame = cv2.flip(frame, 1)
                     hip_text_coord_x = frame_width - hip_coord[0] + 10
-                    knee_text_coord_x = frame_width - knee_coord[0] + 15
-                    ankle_text_coord_x = frame_width - ankle_coord[0] + 10
+                    shoulder_text_coord_x = frame_width - shldr_coord[0] + 15
 
                 
                 
                 if 's3' in self.state_tracker['state_seq'] or current_state == 's1':
-                    self.state_tracker['LOWER_HIPS'] = False
+                    self.state_tracker['LIFT_BODY'] = False
 
                 self.state_tracker['COUNT_FRAMES'][self.state_tracker['DISPLAY_TEXT']]+=1
 
@@ -446,13 +444,13 @@ class ProcessFrame:
 
                 
                 cv2.putText(frame, str(int(hip_vertical_angle)), (hip_text_coord_x, hip_coord[1]), self.font, 0.6, self.COLORS['light_green'], 2, lineType=self.linetype)
-                cv2.putText(frame, str(int(knee_vertical_angle)), (knee_text_coord_x, knee_coord[1]+10), self.font, 0.6, self.COLORS['light_green'], 2, lineType=self.linetype)
-                cv2.putText(frame, str(int(ankle_vertical_angle)), (ankle_text_coord_x, ankle_coord[1]), self.font, 0.6, self.COLORS['light_green'], 2, lineType=self.linetype)
+                cv2.putText(frame, str(int(shoulder_vertical_angle)), (shoulder_text_coord_x, shldr_coord[1]+10), self.font, 0.6, self.COLORS['light_green'], 2, lineType=self.linetype)
+                #cv2.putText(frame, str(int(ankle_vertical_angle)), (ankle_text_coord_x, ankle_coord[1]), self.font, 0.6, self.COLORS['light_green'], 2, lineType=self.linetype)
 
                  
                 draw_text(
                     frame, 
-                    "CORRECT: " + str(self.state_tracker['SQUAT_COUNT']), 
+                    "CORRECT: " + str(self.state_tracker['SITUP_COUNT']), 
                     pos=(int(frame_width*0.68), 30),
                     text_color=(255, 255, 230),
                     font_scale=0.7,
@@ -462,7 +460,7 @@ class ProcessFrame:
 
                 draw_text(
                     frame, 
-                    "INCORRECT: " + str(self.state_tracker['IMPROPER_SQUAT']), 
+                    "INCORRECT: " + str(self.state_tracker['IMPROPER_SITUP']), 
                     pos=(int(frame_width*0.68), 80),
                     text_color=(255, 255, 230),
                     font_scale=0.7,
@@ -489,8 +487,8 @@ class ProcessFrame:
             display_inactivity = False
 
             if self.state_tracker['INACTIVE_TIME'] >= self.thresholds['INACTIVE_THRESH']:
-                self.state_tracker['SQUAT_COUNT'] = 0
-                self.state_tracker['IMPROPER_SQUAT'] = 0
+                self.state_tracker['SITUP_COUNT'] = 0
+                self.state_tracker['IMPROPER_SITUP'] = 0
                 # cv2.putText(frame, 'Resetting SQUAT_COUNT due to inactivity!!!', (10, frame_height - 25), self.font, 0.7, self.COLORS['blue'], 2)
                 display_inactivity = True
 
@@ -498,7 +496,7 @@ class ProcessFrame:
 
             draw_text(
                     frame, 
-                    "CORRECT: " + str(self.state_tracker['SQUAT_COUNT']), 
+                    "CORRECT: " + str(self.state_tracker['SITUP_COUNT']), 
                     pos=(int(frame_width*0.68), 30),
                     text_color=(255, 255, 230),
                     font_scale=0.7,
@@ -508,7 +506,7 @@ class ProcessFrame:
 
             draw_text(
                     frame, 
-                    "INCORRECT: " + str(self.state_tracker['IMPROPER_SQUAT']), 
+                    "INCORRECT: " + str(self.state_tracker['IMPROPER_SITUP']), 
                     pos=(int(frame_width*0.68), 80),
                     text_color=(255, 255, 230),
                     font_scale=0.7,
@@ -527,9 +525,9 @@ class ProcessFrame:
             self.state_tracker['prev_state'] =  None
             self.state_tracker['curr_state'] = None
             self.state_tracker['INACTIVE_TIME_FRONT'] = 0.0
-            self.state_tracker['INCORRECT_POSTURE'] = False
-            self.state_tracker['DISPLAY_TEXT'] = np.full((5,), False)
-            self.state_tracker['COUNT_FRAMES'] = np.zeros((5,), dtype=np.int64)
+            self.state_tracker['INCORRECT_NECK'] = False
+            self.state_tracker['DISPLAY_TEXT'] = np.full((2,), False)
+            self.state_tracker['COUNT_FRAMES'] = np.zeros((2,), dtype=np.int64)
             self.state_tracker['start_inactive_time_front'] = time.perf_counter()
             
             
