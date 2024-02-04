@@ -97,11 +97,11 @@ class ProcessFrame:
         
         knee = None        
 
-        if self.thresholds['SHOUDER_ELBOW_VERT']['NORMAL'][0] <= hip_angle <= self.thresholds['SHOUDER_ELBOW_VERT']['NORMAL'][1]:
+        if self.thresholds['HIP_CHEST_VERT']['NORMAL'][0] <= hip_angle <= self.thresholds['HIP_CHEST_VERT']['NORMAL'][1]:
             knee = 1
-        elif self.thresholds['SHOUDER_ELBOW_VERT']['TRANS'][0] <= hip_angle <= self.thresholds['SHOUDER_ELBOW_VERT']['TRANS'][1]:
+        elif self.thresholds['HIP_CHEST_VERT']['TRANS'][0] <= hip_angle <= self.thresholds['HIP_CHEST_VERT']['TRANS'][1]:
             knee = 2
-        elif self.thresholds['SHOUDER_ELBOW_VERT']['PASS'][0] <= hip_angle <= self.thresholds['SHOUDER_ELBOW_VERT']['PASS'][1]:
+        elif self.thresholds['HIP_CHEST_VERT']['PASS'][0] <= hip_angle <= self.thresholds['HIP_CHEST_VERT']['PASS'][1]:
             knee = 3
 
         return f's{knee}' if knee else None
@@ -365,7 +365,7 @@ class ProcessFrame:
                         self.state_tracker['INCORRECT_NECK'] = True
                         
 
-                    if hip_vertical_angle > self.thresholds['SHOUDER_ELBOW_VERT']['NORMAL'][0] and \
+                    if hip_vertical_angle > self.thresholds['HIP_CHEST_VERT']['NORMAL'][0] and \
                          self.state_tracker['state_seq'].count('s2')==0:
                             self.state_tracker['DISPLAY_TEXT'][0] = True
                             self.state_tracker['LIFT_BODY'] = True
@@ -432,7 +432,7 @@ class ProcessFrame:
 
                 self.state_tracker['COUNT_FRAMES'][self.state_tracker['DISPLAY_TEXT']]+=1
 
-                frame = self._show_feedback(frame, self.state_tracker['COUNT_FRAMES'], self.FEEDBACK_ID_MAP, self.state_tracker['LOWER_HIPS'])
+                frame = self._show_feedback(frame, self.state_tracker['COUNT_FRAMES'], self.FEEDBACK_ID_MAP, self.state_tracker['LIFT_BODY'])
 
 
 
