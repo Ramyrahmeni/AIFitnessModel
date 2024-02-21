@@ -16,7 +16,7 @@ from thresholds import get_thresholds_beginner, get_thresholds_pro
 
 
 
-st.title('AI Fitness Trainer: Bicep Curl Analysis')
+st.title('AI Fitness Trainer: Sit Up Analysis')
 
 mode = st.radio('Select Mode', ['Beginner', 'Pro'], horizontal=True)
 
